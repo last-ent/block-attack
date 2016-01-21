@@ -76,3 +76,85 @@ Powers   -> Signified by the letters in ` ~ `. Works against the opponent.
 
   |> Response (POST) :: json -> ` {'status': ___ }`
 
+### Game Server
+
+* **Game Start**
+    
+    * Request :: json ->
+      ```json
+      {
+        "command": "connect",
+        "self": ___,
+        "opponent": ___
+      }
+      ```
+
+    * Response :: json ->
+      ```json
+      {
+        "command": "game_start",
+        "game_name": ___,
+        "self": ___,
+        "opponent": ___,
+        "user_blocks": ___,
+        "opponent_blocks": ___,
+        "next_block": ___,
+        "time_left": ___,
+        "user_score": ___,
+        "opponent_score: ___
+      }
+      ```
+
+* **Game Continuation**
+    
+    * Request :: json ->
+      ```json
+      {
+        "command": "game_flux",
+        "game_name": ___,
+        "user_blocks": ___,
+        "opponent_blocks": ___,
+        "power_used": ___,
+        "user_score": ___
+      }
+      ```
+
+    * Response :: json ->
+      ```json
+      {
+        "command": "game_flux",
+        "game_name": ___,
+        "user_blocks": ___,
+        "opponent_blocks": ___,
+        "power_used": ___,
+        "power_applied": ___,
+        "next_block": ___,
+        "time_left": ___,
+        "user_score": ___,
+        "opponent_score": ___
+      }
+      ```
+
+* **Game Conclusion**
+    
+    * Request :: json ->
+      ```json
+      {
+        "command": "game_flux",
+        "game_name": ___,
+        "user_blocks": ___,
+        "opponent_blocks": ___,
+        "power_used": ___,
+        "user_score": ___
+      }
+      ```
+
+    * Response :: json ->
+      ```json
+      {
+        "command": "game_end",
+        "winner": ___,
+        "score": ___,
+        "reason": ___
+      }
+      ```
