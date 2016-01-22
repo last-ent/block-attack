@@ -92,6 +92,7 @@ Powers   -> Signified by the letters in ` ~ `. Works against the opponent.
     * Response :: json ->
       ```json
       {
+        "timestamp": ___,
         "command": "game_start",
         "game_name": ___,
         "self": ___,
@@ -101,7 +102,8 @@ Powers   -> Signified by the letters in ` ~ `. Works against the opponent.
         "next_block": ___,
         "time_left": ___,
         "user_score": ___,
-        "opponent_score: ___
+        "opponent_score: ___,
+        "powers_available": ___
       }
       ```
 
@@ -110,18 +112,21 @@ Powers   -> Signified by the letters in ` ~ `. Works against the opponent.
     * Request :: json ->
       ```json
       {
+        "timestamp": ___,
         "command": "game_flux",
         "game_name": ___,
         "user_blocks": ___,
         "opponent_blocks": ___,
         "power_used": ___,
-        "user_score": ___
+        "user_score": ___,
+        "powers_available": ___
       }
       ```
 
     * Response :: json ->
       ```json
       {
+        "timestamp": ___,
         "command": "game_flux",
         "game_name": ___,
         "user_blocks": ___,
@@ -132,6 +137,7 @@ Powers   -> Signified by the letters in ` ~ `. Works against the opponent.
         "time_left": ___,
         "user_score": ___,
         "opponent_score": ___
+        "powers_available": ___
       }
       ```
 
@@ -140,6 +146,7 @@ Powers   -> Signified by the letters in ` ~ `. Works against the opponent.
     * Request :: json ->
       ```json
       {
+        "timestamp": ___,
         "command": "game_flux",
         "game_name": ___,
         "user_blocks": ___,
@@ -152,6 +159,7 @@ Powers   -> Signified by the letters in ` ~ `. Works against the opponent.
     * Response :: json ->
       ```json
       {
+        "timestamp": ___,
         "command": "game_end",
         "winner": ___,
         "score": ___,
