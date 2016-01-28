@@ -1,5 +1,5 @@
 from flask import Flask
-from flask_restful import Resource, Api
+from flask_restful import Api
 
 # Resources
 from resources import all as resource_set
