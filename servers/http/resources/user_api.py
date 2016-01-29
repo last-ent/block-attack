@@ -1,7 +1,7 @@
 from flask_restful import Resource
 from flask import request
 
-from ..state import RedisClient
+from state import RedisClient
 
 redis_api = RedisClient()
 

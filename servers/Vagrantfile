@@ -14,6 +14,7 @@ Vagrant.configure(2) do |config|
   # boxes at https://atlas.hashicorp.com/search.
   config.vm.box = "../../vms/trusty.box"
   config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 8000, host: 9000
   config.vm.synced_folder ".", "/var/www"
   config.vm.provision :shell, path: "./config/bootstrap.sh"
   config.vm.provision "shell", path: "./config/on_start.sh", run: "always"
