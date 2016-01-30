@@ -9,7 +9,7 @@ redis_api = RedisClient()
 class UsersList(Resource):
 
     def get(self):
-        return redis_api.get_all_users(request.args.get('test')=='true')
+        return redis_api.get_all_users(request.args.get('test') == 'true')
 
 
 class UserConnect(Resource):
@@ -49,7 +49,8 @@ class UserConnect(Resource):
 
         ip_addr = request.environ.get('X-Forwarded-For', request.remote_addr)
 
-        # FIXME: Might need to remove this one. Do we really want to handle ip_addr stuff?
+        # FIXME: Might need to remove this one.
+        # Do we really want to handle ip_addr stuff?
         if not redis_api.is_valid_user_request(user1, ip_addr):
             return 'User does not validate.', 400
 
@@ -57,14 +58,14 @@ class UserConnect(Resource):
         is_user2_available = redis_api.is_user_available(user2, lock_user=True)
         if is_user1_available and is_user2_available:
             game = redis_api.create_match(user1, user2)
-            game_id = game[1]
+            response = {'game_id': game[1]}
             status = 201
         else:
             redis_api.release_lock(users=[user1, user2])
-            game_id = 'Unable to create the match'
+            response = {'error': 'Unable to create the match'}
             status = 409
 
-        return game_id, status
+        return response, status
 
 
 class UserLogin(Resource):
