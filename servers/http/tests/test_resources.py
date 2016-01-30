@@ -75,6 +75,7 @@ class TestSetBase(unittest.TestCase):
 
 
 class TestSetBasic(TestSetBase):
+
     def test_default_404(self):
         "'/' returns 404"
         response = self.app.get('/')
@@ -199,6 +200,25 @@ class TestSetState(TestSetBase):
         assert user1 and user2
         assert user1['status'] == state.RedisClient.USER_PLAYING
         assert user2['status'] == state.RedisClient.USER_PLAYING
+
+
+class TestSetUserLogin(TestSetBase):
+    URL = '/login'
+
+    def test_login_new(self):
+        "A new username should be able to log in"
+        response = self.post_payload_response({'username': 'test-new'})
+        data = response.get_data().decode('utf8').strip()
+        assert response.status_code == 201
+        assert data == '"User succesfully logged in."'
+
+    def test_login_duplicate(self):
+        "Duplicated username should fail."
+        response = self.post_payload_response({'username': 'test-new'})
+        assert response.status_code == 201
+
+        response = self.post_payload_response({'username': 'test-new'})
+        assert response.status_code == 409
 
 
 if __name__ == '__main__':

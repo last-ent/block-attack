@@ -73,13 +73,13 @@ class UserLogin(Resource):
         payload = request.get_json()
         user = payload['username']
 
-        if not all(redis_api.get_user(user)):
+        if redis_api.does_user_exist(user):
             return 'User already logged in.', 409
 
         ip_addr = request.environ.get('X-Forwarded-For', request.remote_addr)
         redis_api.set_user(user, {'ip_addr': ip_addr})
 
-        return "User logged in.", 201
+        return "User succesfully logged in.", 201
 
 resources = (
     (UsersList, '/users'),

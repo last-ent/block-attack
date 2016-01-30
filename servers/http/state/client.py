@@ -75,7 +75,7 @@ class RedisClient(object):
         redis_user = "user:{}".format(user)
         user_data = self.redis_client.hgetall(redis_user)
         data['username'] = user
-        data_status = data['status']
+        data_status = data.get('status')
         data['status'] = data_status if data_status else self.USER_AVAILABLE
 
         for key in self.USER_SET_KEYS:
@@ -118,13 +118,17 @@ class RedisClient(object):
         user = self.redis_client.hgetall('user:{}'.format(username))
         return user.get('ip_addr') == ip_addr
 
+    def does_user_exist(self, username):
+        return self.redis_client.exists("user:{}".format(username))
+
     def create_match(self, user1, user2):
         now = time.mktime(datetime.datetime.utcnow().timetuple()) * 1000
         match_id = 'match:{}'.format(now)
         expire_at = now + self.MAX_GAMETIME
+        user_status = {'status': self.USER_PLAYING}
 
-        self.set_user(user1, {'status': self.USER_PLAYING})
-        self.set_user(user2, {'status': self.USER_PLAYING})
+        self.set_user(user1, user_status)
+        self.set_user(user2, user_status)
 
         self.redis_client.hmset(match_id, {
             'user1': user1, 'user2': user2,
