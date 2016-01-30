@@ -6,20 +6,10 @@ from state import RedisClient
 redis_api = RedisClient()
 
 
-# def get_payload(req):
-# try:
-#     payload = request.get_json()
-# except Exception as e:
-#     return False, {"error": "Payload expected", "status": 400}, 400
-
-# payload = request.get_json()
-# return payload, 200
-
-
 class UsersList(Resource):
 
     def get(self):
-        return redis_api.get_all_users()
+        return redis_api.get_all_users(request.args.get('test')=='true')
 
 
 class UserConnect(Resource):
@@ -34,6 +24,11 @@ class UserConnect(Resource):
         }
     """
 
+    def validate_payload(self, payload):
+        username = payload.get('username')
+        opponent = payload.get('opponent')
+        return username, opponent
+
     def post(self):
         """
             * Check if `username` matches the ip_addr in system.
@@ -42,18 +37,26 @@ class UserConnect(Resource):
             * Send status and game id in Response.
         """
         payload = request.get_json()
+        user1, user2 = self.validate_payload(payload)
+
+        if not (user1 and user2):
+            return "Error with payload", 400
+        elif not (
+            redis_api.redis_client.exists("user:{}".format(user1)) and
+            redis_api.redis_client.exists("user:{}".format(user2))
+        ):
+            return "Both users are not valid.", 400
 
         ip_addr = request.environ.get('X-Forwarded-For', request.remote_addr)
 
-        if not redis_api.is_valid_user_request(payload['username'], ip_addr):
-            return 'User does not validate.', 403
+        # FIXME: Might need to remove this one. Do we really want to handle ip_addr stuff?
+        if not redis_api.is_valid_user_request(user1, ip_addr):
+            return 'User does not validate.', 400
 
-        user1 = payload['username']
-        user2 = payload['opponent']
         is_user1_available = redis_api.is_user_available(user1, lock_user=True)
         is_user2_available = redis_api.is_user_available(user2, lock_user=True)
         if is_user1_available and is_user2_available:
-            game = redis_api.create_game(user1, user2)
+            game = redis_api.create_match(user1, user2)
             game_id = game[1]
             status = 201
         else:
