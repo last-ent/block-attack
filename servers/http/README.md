@@ -17,6 +17,7 @@
   |> POST :: json -> `{'username': ___, 'opponent': ___}`
 
   |> Response (POST) :: json -> ` {'game_id': ___ }`
+  
   |> Response (POST) :: json -> ` {'error': 'Unable to create the match' }`
 
 * `/login`
