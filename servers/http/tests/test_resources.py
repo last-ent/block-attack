@@ -3,6 +3,44 @@ import state
 import unittest
 import json
 
+redis_collective_data = {
+    'user:test-1': {
+        'status': state.RedisClient.USER_AVAILABLE,
+        'ip_addr': 'test.1.ip.addr',
+        'username': 'test-1'
+    },
+    'user:test-2': {
+        'status': state.RedisClient.USER_AVAILABLE,
+        'ip_addr': 'test.2.ip.addr',
+        'username': 'test-2'
+    },
+    'user:test-3': {
+        'status': state.RedisClient.USER_LOCKED,
+        'ip_addr': 'test.3.ip.addr',
+        'username': 'test-3'
+    },
+    'user:test-4': {
+        'status': state.RedisClient.USER_AVAILABLE,
+        'ip_addr': 'test.4.ip.addr',
+        'username': 'test-4'
+    },
+    'user:test-5': {
+        'status': state.RedisClient.USER_AVAILABLE,
+        'ip_addr': 'test.5.ip.addr',
+        'username': 'test-5'
+    },
+    'user:test-6': {
+        'status': state.RedisClient.USER_AVAILABLE,
+        'ip_addr': 'test.6.ip.addr',
+        'username': 'test-6'
+    },
+    'user:test-7': {
+        'status': state.RedisClient.USER_AVAILABLE,
+        'ip_addr': 'test.7.ip.addr',
+        'username': 'test-7'
+    },
+}
+
 
 class TestSetBase(unittest.TestCase):
 
@@ -16,14 +54,8 @@ class TestSetBase(unittest.TestCase):
 
     def tearDown(self):
         test_keys = state.RedisClient.redis_client.keys(pattern='user:test*')
-        # state.RedisClient.redis_client.delete(*test_keys)
         for key in test_keys:
             state.RedisClient.redis_client.delete(key)
-
-    def test_default_404(self):
-        "'/' returns 404"
-        response = self.app.get('/')
-        assert response.status_code == 404
 
     def post_payload_response(self, payload, redis_data={}, url=None):
         self.setup_redis(redis_data)
@@ -34,23 +66,26 @@ class TestSetBase(unittest.TestCase):
         )
         return response
 
+    def get_redis_data(self, *ids):
+        redis_data = {}
+        for id in ids:
+            key = 'user:test-{}'.format(id)
+            redis_data[key] = redis_collective_data[key]
+        return redis_data
+
+
+class TestSetBasic(TestSetBase):
+    def test_default_404(self):
+        "'/' returns 404"
+        response = self.app.get('/')
+        assert response.status_code == 404
+
 
 class TestSetUsersList(TestSetBase):
 
     def test_get_list(self):
         "/users :: GET should return list of users."
-        redis_data = {
-            'user:test-1': {
-                'status': state.RedisClient.USER_AVAILABLE,
-                'ip_addr': 'test.1.ip.addr',
-                'username': 'test-1'
-            },
-            'user:test-2': {
-                'status': state.RedisClient.USER_AVAILABLE,
-                'ip_addr': 'test.2.ip.addr',
-                'username': 'test-2'
-            },
-        }
+        redis_data = self.get_redis_data(1, 2)
         self.setup_redis(redis_data)
 
         response = self.app.get('/users?test=true')
@@ -101,61 +136,22 @@ class TestSetUserConnect(TestSetBase):
 
     def test_post_user_is_unavailable(self):
         "If a user is unavailable, 409 should be thrown."
-        redis_data = {
-            'user:test-3': {
-                'status': state.RedisClient.USER_LOCKED,
-                'ip_addr': 'test.3.ip.addr',
-                'username': 'test-3'
-            },
-            'user:test-4': {
-                'status': state.RedisClient.USER_AVAILABLE,
-                'ip_addr': 'test.4.ip.addr',
-                'username': 'test-4'
-            },
-        }
+        redis_data = self.get_redis_data(3, 4)
         payload = {'username': "test-3", 'opponent': "test-4"}
         response = self.post_payload_response(payload, redis_data)
         assert response.status_code == 409
 
-
     def test_post_create_match(self):
         "If both users are available, 201 should be returned."
-        redis_data = {
-            'user:test-5': {
-                'status': state.RedisClient.USER_AVAILABLE,
-                'ip_addr': 'test.5.ip.addr',
-                'username': 'test-5'
-            },
-            'user:test-6': {
-                'status': state.RedisClient.USER_AVAILABLE,
-                'ip_addr': 'test.6.ip.addr',
-                'username': 'test-6'
-            },
-        }
+        redis_data = self.get_redis_data(5, 6)
         payload = {'username': "test-5", 'opponent': "test-6"}
         response = self.post_payload_response(payload, redis_data)
         assert response.status_code == 201
 
     def test_post_match_fail_common_player(self):
         ("If two requests are received with a common user,"
-                 " ensure that only one match is created.")
-        redis_data = {
-            'user:test-5': {
-                'status': state.RedisClient.USER_AVAILABLE,
-                'ip_addr': 'test.5.ip.addr',
-                'username': 'test-5'
-            },
-            'user:test-6': {
-                'status': state.RedisClient.USER_AVAILABLE,
-                'ip_addr': 'test.6.ip.addr',
-                'username': 'test-6'
-            },
-            'user:test-7': {
-                'status': state.RedisClient.USER_AVAILABLE,
-                'ip_addr': 'test.7.ip.addr',
-                'username': 'test-7'
-            },
-        }
+         " ensure that only one match is created.")
+        redis_data = self.get_redis_data(5, 6, 7)
 
         payload = {'username': "test-5", 'opponent': "test-6"}
         response = self.post_payload_response(payload, redis_data)
@@ -171,18 +167,7 @@ class TestSetState(TestSetBase):
 
     def test_match_user_pairing(self):
         "If a match is created, ensure it is between correct users"
-        redis_data = {
-            'user:test-5': {
-                'status': state.RedisClient.USER_AVAILABLE,
-                'ip_addr': 'test.5.ip.addr',
-                'username': 'test-5'
-            },
-            'user:test-6': {
-                'status': state.RedisClient.USER_AVAILABLE,
-                'ip_addr': 'test.6.ip.addr',
-                'username': 'test-6'
-            }
-        }
+        redis_data = self.get_redis_data(5, 6)
         payload = {'username': "test-5", 'opponent': "test-6"}
         response = self.post_payload_response(payload, redis_data)
         assert response.status_code == 201
@@ -197,18 +182,7 @@ class TestSetState(TestSetBase):
 
     def test_match_users_status(self):
         "If a match is created, ensure their statuses are set to 'Playing'"
-        redis_data = {
-            'user:test-5': {
-                'status': state.RedisClient.USER_AVAILABLE,
-                'ip_addr': 'test.5.ip.addr',
-                'username': 'test-5'
-            },
-            'user:test-6': {
-                'status': state.RedisClient.USER_AVAILABLE,
-                'ip_addr': 'test.6.ip.addr',
-                'username': 'test-6'
-            }
-        }
+        redis_data = self.get_redis_data(5, 6)
         payload = {'username': "test-5", 'opponent': "test-6"}
         response = self.post_payload_response(payload, redis_data)
         assert response.status_code == 201
@@ -225,8 +199,6 @@ class TestSetState(TestSetBase):
         assert user1 and user2
         assert user1['status'] == state.RedisClient.USER_PLAYING
         assert user2['status'] == state.RedisClient.USER_PLAYING
-
-
 
 
 if __name__ == '__main__':
