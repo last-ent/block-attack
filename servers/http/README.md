@@ -16,7 +16,8 @@
 
   |> POST :: json -> `{'username': ___, 'opponent': ___}`
 
-  |> Response (POST) :: json -> ` {'status': ___ }`
+  |> Response (POST) :: json -> ` {'game_id': ___ }`
+  |> Response (POST) :: json -> ` {'error': 'Unable to create the match' }`
 
 * `/login`
 
@@ -24,6 +25,6 @@
 
   |> POST :: json -> `{'username': ___}`
 
-  |> Response (POST) :: json -> ` {'status': ___ }`
+  |> Response (POST) :: str -> `User succesfully logged in.`
 
 
